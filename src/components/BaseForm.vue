@@ -1,71 +1,17 @@
-<template>
-  <div class="form__wrapper">
-    <form id="form" action="" class="form">
-      <base-field />
-      <div
-        v-for="(input, index) of formInputs"
-        :key="index"
-        class="form__input-wrapper"
-      >
-        <label class="form__input-label" :for="input.label">{{
-          input.label
-        }}</label>
-        <input
-          :id="input.label"
-          v-model="input.value"
-          class="form__input"
-          :placeholder="input.placeholder"
-          :type="input.type"
-        />
-      </div>
-
-      <div class="form__input-wrapper">
-        <label class="form__input-label" for="email">Email</label>
-        <input
-          id="email"
-          v-model="form.email"
-          class="form__input"
-          placeholder="Обязательное поле"
-          type="email"
-        />
-      </div>
-
-      <div class="form__input-wrapper">
-        <label class="form__input-label" for="phone">Телефон</label>
-        <input
-          id="phone"
-          v-model="form.phone"
-          class="form__input"
-          placeholder="Обязательное поле"
-          type="tel"
-        />
-      </div>
-
-      <div class="form__input-wrapper">
-        <label class="form__input-label" for="comment">Комментарий</label>
-        <textarea
-          id="comment"
-          v-model="form.comment"
-          class="form__input"
-          placeholder="Необязательное поле"
-        />
-      </div>
-
-      <div class="form__input-wrapper">
-        <label class="form__input-label" for="agreement"
-          >Согласие на обработку персональных данных</label
-        >
-        <input
-          id="agreement"
-          v-model="form.isAgreed"
-          class="form__input"
-          type="checkbox"
-        />
-      </div>
-
-      <button type="submit" class="form__button-submit">Отправить</button>
-    </form>
-  </div>
+<template lang="pug">
+div
+  template(v-if='!showMessage')
+    .form__wrapper
+      form#form(@submit.prevent='validateForm(formFields)')
+        legend Анкета
+        fieldset
+          base-field(:form-fields='formFields')
+          button.form__button-submit(type='submit') Отправить
+  template(v-if='showMessage')
+    .form__wrapper
+      legend Анкета успешно отправлена!
+        fieldset
+          button.form__button-submit(@click='toggleMessage()') Отправить снова
 </template>
 
 <script>
@@ -77,10 +23,81 @@ export default {
     BaseField
   },
   data() {
-    return {};
+    return {
+      showMessage: false,
+      formFields: [
+        {
+          tag: 'input',
+          id: 'name',
+          type: 'text',
+          label: 'ФИО',
+          value: null,
+          placeholder: 'Обязательное поле',
+          required: true
+        },
+        {
+          tag: 'input',
+          id: 'email',
+          type: 'email',
+          label: 'Email',
+          value: null,
+          placeholder: 'Обязательное поле',
+          required: true
+        },
+        {
+          tag: 'input',
+          id: 'phone',
+          type: 'tel',
+          label: 'Телефон',
+          value: null,
+          placeholder: 'Обязательное поле',
+          required: true
+        },
+        {
+          tag: 'textarea',
+          id: 'commentary',
+          label: 'Комментарий',
+          value: null,
+          placeholder: 'Необязательное поле',
+          required: false
+        },
+        {
+          tag: 'input',
+          id: 'agreement',
+          type: 'checkbox',
+          label: 'Согласие на обработку персональных данных',
+          value: null,
+          required: true
+        }
+      ]
+    };
   },
 
-  methods: {}
+  methods: {
+    validateForm() {
+      const emptyRequiredFields = [];
+      this.formFields.map(item => {
+        if (item.required && !item.value) {
+          emptyRequiredFields.push(item.label);
+        }
+      });
+
+      if (emptyRequiredFields.length > 0) {
+        alert(
+          `Необходимо заполнить следующие поля: ${emptyRequiredFields.join(
+            ', '
+          )}`
+        );
+      } else {
+        this.toggleMessage();
+      }
+    },
+
+    toggleMessage() {
+      this.showMessage = !this.showMessage;
+      this.formFields.forEach(item => (item.value = null));
+    }
+  }
 };
 </script>
 
@@ -92,12 +109,6 @@ export default {
     &__wrapper {
       display: flex;
       justify-content: center;
-    }
-
-    &__input {
-      &-wrapper {
-        display: flex;
-      }
     }
   }
 </style>
